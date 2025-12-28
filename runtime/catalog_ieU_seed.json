@@ -1,0 +1,71 @@
+{
+  "org": "Izmir University of Economics",
+  "version": "v0.3",
+  "updated_at": "2025-12-28",
+  "campus": { 
+    "target_year": 2035, 
+    "net_zero_target_pct": 100,
+    "kpis": { "co2e_t": 18450, "energy_mwh": 14200, "water_m3": 45000, "intensity": 1.2, "progress": 42, "projects": 2100 },
+    "levers": [
+       { "title": "Campus-wide HVAC Optimization", "type": "leverage" },
+       { "title": "Solar Carport Installation", "type": "quick_win" },
+       { "title": "Zero-Waste Cafeteria Policy", "type": "policy" }
+    ]
+  },
+  "faculties": [
+    {
+      "id": "fine_arts",
+      "name": "Fine Arts & Design",
+      "kpis": { "co2e_t": 4200, "energy_mwh": 3100, "water_m3": 12000, "intensity": 0.9, "progress": 55, "projects": 850 },
+      "departments": [
+        { 
+            "id": "arch", 
+            "name": "Architecture", 
+            "kpis": { "co2e_t": 1800, "energy_mwh": 1400, "water_m3": 4000, "intensity": 1.1, "progress": 60, "projects": 400 },
+            "levers": [
+                { "title": "Studio Lighting Retrofit", "type": "quick_win" },
+                { "title": "Model Making Waste Reduction", "type": "leverage" }
+            ]
+        },
+        { 
+            "id": "ind_design", 
+            "name": "Industrial Design", 
+            "kpis": { "co2e_t": 1100, "energy_mwh": 900, "water_m3": 2500, "intensity": 0.8, "progress": 45, "projects": 250 },
+             "levers": [
+                { "title": "3D Printing Material Recycling", "type": "tech" },
+                { "title": "Workshop Dust Extraction Opt.", "type": "ops" }
+            ]
+        }
+      ],
+      "studio_projects": [
+        { "title": "Adaptive Reuse of Block C", "impact_co2e_t": 120, "eta": "2026-Q2", "owner": "Arch Studio 4" },
+        { "title": "Bio-material Furniture", "impact_co2e_t": 45, "eta": "2025-Q4", "owner": "Ind. Design Lab" }
+      ],
+      "levers": [
+        { "title": "LED retrofit + occupancy sensors", "type": "quick_win" },
+        { "title": "HVAC scheduling (Studios)", "type": "leverage" },
+        { "title": "Sustainable Material Sourcing", "type": "policy" }
+      ]
+    },
+    {
+      "id": "engineering",
+      "name": "Engineering",
+      "kpis": { "co2e_t": 5800, "energy_mwh": 4800, "water_m3": 9000, "intensity": 1.4, "progress": 35, "projects": 600 },
+      "departments": [],
+      "levers": [
+         { "title": "Lab Equipment Power Mgmt", "type": "ops" },
+         { "title": "Server Room Cooling", "type": "tech" }
+      ]
+    },
+    {
+      "id": "business",
+      "name": "Business",
+      "kpis": { "co2e_t": 2100, "energy_mwh": 1800, "water_m3": 5000, "intensity": 0.6, "progress": 20, "projects": 150 },
+      "departments": [],
+      "levers": [
+         { "title": "Paperless Exams", "type": "policy" },
+         { "title": "Hybrid Classrooms", "type": "tech" }
+      ]
+    }
+  ]
+}

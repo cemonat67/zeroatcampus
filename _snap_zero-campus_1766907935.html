@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero@Campus - Sustainability Decision Support</title>
+    <style>
+        :root {
+            --zero-navy: #02154e;
+            --zero-orange: #f9ba00;
+            --zero-green: #005530;
+            --zero-red: #D51635;
+            --zero-white: #ffffff;
+            --zero-black: #1a1a1a;
+            --zero-gray-dark: #666666;
+            --zero-gray-medium: #9E9E9E;
+            --zero-gray-light: #e0e0e0;
+            --zero-gray-bg: #fafafa;
+
+            --zero-space-xs: 0.5rem;
+            --zero-space-sm: 1rem;
+            --zero-space-md: 2rem;
+            --zero-space-lg: 4rem;
+            
+            --zero-radius-sm: 4px;
+            --zero-radius-md: 6px;
+            --zero-radius-lg: 8px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--zero-gray-bg);
+            color: var(--zero-black);
+            line-height: 1.6;
+            padding-top: 4px;
+        }
+        
+        .zero-color-bar {
+            height: 4px;
+            width: 100%;
+            background: linear-gradient(90deg, 
+                var(--zero-green) 0%, var(--zero-green) 25%, 
+                var(--zero-red) 25%, var(--zero-red) 50%, 
+                var(--zero-navy) 50%, var(--zero-navy) 75%, 
+                var(--zero-orange) 75%, var(--zero-orange) 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        
+        .app-header {
+            background: var(--zero-navy);
+            color: var(--zero-white);
+            padding: var(--zero-space-md);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            max-width: 1600px;
+            margin: 0 auto;
+            gap: var(--zero-space-md);
+        }
+        
+        .header-logo {
+            width: 112px;
+            height: 112px;
+            opacity: 0.95;
+            transition: opacity 0.3s ease;
+        }
+        
+        .title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            justify-content: center;
+        }
+        
+        .title {
+            font-size: 2rem;
+            font-weight: 300;
+            line-height: 1.1;
+        }
+        
+        .title-at {
+            color: var(--zero-orange);
+        }
+        
+        .subtitle {
+            font-size: 1rem;
+            font-weight: 400;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 0.25rem;
+        }
+        
+        .hero-oneliner {
+            font-size: 0.85rem;
+            font-weight: 300;
+            color: rgba(255,255,255,0.6);
+            letter-spacing: 0.5px;
+        }
+        
+        .subtitle-at {
+            color: var(--zero-orange);
+        }
+
+        .demo-badge {
+            margin-left: auto;
+            background: var(--zero-orange);
+            border: 1px solid var(--zero-orange);
+            color: var(--zero-navy);
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--zero-radius-md);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(249, 186, 0, 0.3);
+        }
+
+        .demo-badge:hover {
+            background: #e0a800;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(249, 186, 0, 0.4);
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: var(--zero-space-md);
+        }
+        
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--zero-space-sm);
+            margin-bottom: var(--zero-space-md);
+        }
+        
+        .stat-card {
+            background: var(--zero-white);
+            border-radius: var(--zero-radius-lg);
+            padding: var(--zero-space-md);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--zero-gray-dark);
+            margin-bottom: var(--zero-space-xs);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 300;
+            color: var(--zero-navy);
+        }
+        
+        .stat-value.green { color: var(--zero-green); }
+        .stat-value.orange { color: var(--zero-orange); }
+        .stat-value.red { color: var(--zero-red); }
+        
+        .stat-subtitle {
+            font-size: 0.75rem;
+            color: var(--zero-gray-medium);
+            margin-top: var(--zero-space-xs);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: var(--zero-space-xs);
+            margin-bottom: var(--zero-space-md);
+            background: var(--zero-white);
+            padding: var(--zero-space-xs);
+            border-radius: var(--zero-radius-lg);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-radius: var(--zero-radius-sm);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--zero-gray-dark);
+            transition: all 0.3s ease;
+            flex: 1;
+            white-space: nowrap;
+        }
+        
+        .tab-btn.active {
+            background: var(--zero-navy);
+            color: var(--zero-white);
+        }
+        
+        .tab-btn:hover:not(.active) {
+            background: var(--zero-gray-light);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .scope-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: var(--zero-space-sm);
+            margin-bottom: var(--zero-space-md);
+        }
+        
+        .scope-card {
+            background: var(--zero-white);
+            border-radius: var(--zero-radius-lg);
+            padding: var(--zero-space-md);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .scope-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+        
+        .scope-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--zero-space-sm);
+        }
+        
+        .scope-icon {
+            font-size: 2rem;
+            margin-bottom: var(--zero-space-xs);
+            color: var(--zero-navy);
+        }
+        
+        .scope-name {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--zero-navy);
+        }
+        
+        .scope-description {
+            font-size: 0.75rem;
+            color: var(--zero-gray-medium);
+            margin-top: 0.25rem;
+        }
+        
+        .breakdown-list {
+            margin-top: var(--zero-space-sm);
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: var(--zero-space-xs) 0;
+            border-bottom: 1px solid var(--zero-gray-light);
+            font-size: 0.875rem;
+        }
+        
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+        
+        .breakdown-label {
+            color: var(--zero-gray-dark);
+        }
+        
+        .breakdown-value {
+            font-weight: 500;
+            color: var(--zero-black);
+        }
+        
+        .action-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--zero-navy);
+            color: var(--zero-white);
+            border: none;
+            border-radius: var(--zero-radius-sm);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .action-btn:hover {
+            background: var(--zero-orange);
+            color: var(--zero-navy);
+        }
+
+        .action-btn.secondary {
+            background: var(--zero-white);
+            color: var(--zero-navy);
+            border: 1px solid var(--zero-navy);
+        }
+        
+        .action-btn.secondary:hover {
+            background: var(--zero-navy);
+            color: var(--zero-white);
+        }
+        
+        .roadmap-panel {
+            background: var(--zero-white);
+            border-radius: var(--zero-radius-lg);
+            padding: var(--zero-space-md);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: var(--zero-space-md);
+        }
+        
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--zero-navy);
+            margin-bottom: var(--zero-space-md);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Chart Styles */
+        .chart-container {
+            height: 250px;
+            width: 100%;
+            margin-top: 1rem;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--zero-gray-light);
+        }
+
+        .chart-bar {
+            flex: 1;
+            margin: 0 2px;
+            background: var(--zero-navy);
+            opacity: 0.8;
+            border-radius: 2px 2px 0 0;
+            position: relative;
+            transition: height 1s ease;
+        }
+
+        .chart-bar.forecast {
+            background: repeating-linear-gradient(
+                45deg,
+                var(--zero-orange),
+                var(--zero-orange) 5px,
+                rgba(249, 186, 0, 0.5) 5px,
+                rgba(249, 186, 0, 0.5) 10px
+            );
+        }
+
+        .chart-line-water {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* Brief Generator Styles */
+        .brief-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .brief-option-card {
+            border: 2px solid var(--zero-gray-light);
+            border-radius: var(--zero-radius-lg);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .brief-option-card:hover, .brief-option-card.selected {
+            border-color: var(--zero-navy);
+            background: rgba(2, 21, 78, 0.03);
+        }
+
+        .brief-option-card h4 {
+            color: var(--zero-navy);
+            margin-bottom: 0.5rem;
+        }
+
+        .brief-output {
+            background: #f4f4f4;
+            border-radius: var(--zero-radius-lg);
+            padding: 2rem;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            position: relative;
+            border-left: 4px solid var(--zero-orange);
+            display: none;
+        }
+
+        .brief-output.visible {
+            display: block;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Demo Tooltip */
+        .demo-tooltip {
+            position: absolute;
+            background: var(--zero-navy);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--zero-radius-md);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            z-index: 2000;
+            max-width: 300px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border-left: 4px solid var(--zero-orange);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .demo-tooltip::after {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 20px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 8px solid var(--zero-navy);
+        }
+
+        .demo-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .demo-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .demo-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .demo-btn.primary {
+            background: var(--zero-orange);
+            color: var(--zero-navy);
+            border-color: var(--zero-orange);
+            font-weight: 600;
+        }
+
+        .demo-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 1999;
+            display: none;
+            pointer-events: none; /* Allow clicks through, but visually dims */
+        }
+        
+        @media (max-width: 768px) {
+            .header-content { flex-direction: column; align-items: flex-start; gap: 1rem; }
+            .header-logo { width: 80px; height: 80px; }
+            .tabs { flex-direction: column; }
+            .scope-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="zero-color-bar"></div>
+    <div id="demoOverlay" class="demo-overlay"></div>
+    <div id="demoTooltip" class="demo-tooltip"></div>
+    
+    <header class="app-header">
+        <div class="header-content">
+            <!-- Logo SVG -->
+            <svg class="header-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+                <rect width="400" height="400" fill="#02154e"/>
+                <text x="50" y="180" font-family="Arial, sans-serif" font-size="80" font-weight="bold" fill="white">Zero@</text>
+                <text x="50" y="280" font-family="Arial, sans-serif" font-size="70" font-weight="bold" fill="white">Campus</text>
+                <rect x="50" y="295" width="300" height="5" fill="#f9ba00"/>
+                <text x="50" y="340" font-family="Arial, sans-serif" font-size="24" fill="white">Sustainability</text>
+                <text x="50" y="370" font-family="Arial, sans-serif" font-size="24" fill="white">Decision Support</text>
+            </svg>
+            
+            <div class="title-group">
+                <div class="title">Zero<span class="title-at">@</span>Campus</div>
+                <div class="subtitle">Campus sustainability decision support platform</div>
+                <div class="hero-oneliner">From campus operations to studio projects — measurable impact.</div>
+            </div>
+
+            <button class="demo-badge" onclick="startDemoMode()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                Run 2-Minute Demo
+            </button>
+        </div>
+    </header>
+    
+    <main class="container">
+        <!-- Dashboard Stats -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Campus Footprint (YTD)</div>
+                <div class="stat-value"><span class="val-total">18,450</span> tCO₂e</div>
+                <div class="stat-subtitle">-12% vs 2024 (21,000 tCO₂e)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Intensity</div>
+                <div class="stat-value orange">1.2 tCO₂e</div>
+                <div class="stat-subtitle">Per Student / Year</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Net-Zero Progress</div>
+                <div class="stat-value green"><span class="val-progress">42%</span></div>
+                <div class="stat-subtitle">Target: 2035 (Campus Neutrality)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Projects & Credits</div>
+                <div class="stat-value green"><span class="val-offset">2,100</span> tCO₂</div>
+                <div class="stat-subtitle">Active Student Projects</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('overview')">Campus Overview</button>
+            <button class="tab-btn" onclick="showTab('executive')">Dean / Rectorate</button>
+            <button class="tab-btn" onclick="showTab('scopes')">Impact Areas</button>
+            <button class="tab-btn" onclick="showTab('forecast')">Forecast (AI)</button>
+            <button class="tab-btn" onclick="showTab('generator')">Generator Mode</button>
+            <button class="tab-btn" onclick="showTab('roadmap')">Campus Roadmap</button>
+            <button class="tab-btn" onclick="showTab('reporting')">Institutional Output</button>
+        </div>
+        
+        <!-- Tab Content: Campus Overview -->
+        <div id="overview" class="tab-content active">
+            <div class="roadmap-panel">
+                <h3 class="panel-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4 8 4v14M8 21v-2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    Campus Footprint Breakdown 2025
+                </h3>
+                <div class="scope-grid">
+                    <div class="stat-card" style="border-left: 4px solid var(--zero-red);">
+                        <div class="stat-label">Buildings (Energy)</div>
+                        <div class="stat-value red">8,450 tCO₂e</div>
+                        <div class="stat-subtitle">Labs, Studios, Dorms</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 4px solid var(--zero-orange);">
+                        <div class="stat-label">Mobility</div>
+                        <div class="stat-value orange">5,200 tCO₂e</div>
+                        <div class="stat-subtitle">Shuttles, Student Commute</div>
+                    </div>
+                    <div class="stat-card" style="border-left: 4px solid var(--zero-navy);">
+                        <div class="stat-label">Procurement</div>
+                        <div class="stat-value">4,800 tCO₂e</div>
+                        <div class="stat-subtitle">Materials, Food, Waste</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="roadmap-panel">
+                 <h3 class="panel-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                    Top Emission Sources (Fine Arts Focus)
+                </h3>
+                <div class="breakdown-list">
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">1. Studio Lighting & HVAC</div>
+                        <div class="breakdown-value">4,200 tCO₂e (22.7%)</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">2. Material Procurement (Design)</div>
+                        <div class="breakdown-value">3,100 tCO₂e (16.8%)</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">3. Student Commuting</div>
+                        <div class="breakdown-value">2,800 tCO₂e (15.1%)</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">4. Campus Cafeteria</div>
+                        <div class="breakdown-value">1,500 tCO₂e (8.1%)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Dean / Rectorate (Executive) -->
+        <div id="executive" class="tab-content">
+            <div class="roadmap-panel">
+                <h3 class="panel-title">Decisions Support Suite</h3>
+                <div class="scope-grid">
+                    <!-- Rectorate -->
+                    <div class="scope-card" style="border-left: 4px solid var(--zero-navy);">
+                        <div class="scope-header">
+                            <div>
+                                <div class="scope-name">Rectorate</div>
+                                <div class="scope-description">Strategic Campus Vision</div>
+                            </div>
+                        </div>
+                        <div class="breakdown-list">
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Global Ranking Impact</div>
+                                <div class="breakdown-value" style="color: var(--zero-green);">High</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Student Satisfaction</div>
+                                <div class="breakdown-value">88%</div>
+                            </div>
+                        </div>
+                        <button class="action-btn" style="width: 100%; margin-top: 1rem;" onclick="alert('Generating Rectorate Brief...')">Generate Strategic View</button>
+                    </div>
+
+                    <!-- Dean -->
+                    <div class="scope-card" style="border-left: 4px solid var(--zero-orange);">
+                        <div class="scope-header">
+                            <div>
+                                <div class="scope-name">Dean (Fine Arts)</div>
+                                <div class="scope-description">Curriculum & Studios</div>
+                            </div>
+                        </div>
+                        <div class="breakdown-list">
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Sustainable Courses</div>
+                                <div class="breakdown-value">12 / 40</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Studio Efficiency</div>
+                                <div class="breakdown-value" style="color: var(--zero-orange);">Needs Improvement</div>
+                            </div>
+                        </div>
+                        <button class="action-btn" style="width: 100%; margin-top: 1rem;" onclick="alert('Generating Dean Brief...')">Generate Faculty View</button>
+                    </div>
+
+                     <!-- Facility -->
+                    <div class="scope-card" style="border-left: 4px solid var(--zero-red);">
+                        <div class="scope-header">
+                            <div>
+                                <div class="scope-name">Facility Mgmt</div>
+                                <div class="scope-description">Operations & Maintenance</div>
+                            </div>
+                        </div>
+                        <div class="breakdown-list">
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Energy Cost (YTD)</div>
+                                <div class="breakdown-value">₺4.2M</div>
+                            </div>
+                            <div class="breakdown-item">
+                                <div class="breakdown-label">Water Savings</div>
+                                <div class="breakdown-value" style="color: var(--zero-green);">15% vs 2024</div>
+                            </div>
+                        </div>
+                        <button class="action-btn" style="width: 100%; margin-top: 1rem;" onclick="alert('Generating Facility Report...')">Generate Ops View</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Impact Areas -->
+        <div id="scopes" class="tab-content">
+            <div class="scope-grid">
+                <div class="scope-card">
+                    <div class="scope-name">Buildings</div>
+                    <div class="scope-description">Scope 1 & 2</div>
+                    <div class="emission-value" style="margin: 1rem 0;">8,450 tCO₂e</div>
+                    <div class="breakdown-list">
+                        <div class="breakdown-item"><div class="breakdown-label">Electricity</div><div class="breakdown-value">5,200</div></div>
+                        <div class="breakdown-item"><div class="breakdown-label">Heating (Natural Gas)</div><div class="breakdown-value">3,250</div></div>
+                    </div>
+                </div>
+                <div class="scope-card">
+                    <div class="scope-name">Mobility</div>
+                    <div class="scope-description">Transport</div>
+                    <div class="emission-value" style="margin: 1rem 0;">5,200 tCO₂e</div>
+                    <div class="breakdown-list">
+                        <div class="breakdown-item"><div class="breakdown-label">Student Commuting</div><div class="breakdown-value">2,800</div></div>
+                        <div class="breakdown-item"><div class="breakdown-label">Campus Shuttles</div><div class="breakdown-value">1,400</div></div>
+                        <div class="breakdown-item"><div class="breakdown-label">Academic Travel</div><div class="breakdown-value">1,000</div></div>
+                    </div>
+                </div>
+                <div class="scope-card">
+                    <div class="scope-name">Procurement</div>
+                    <div class="scope-description">Scope 3</div>
+                    <div class="emission-value" style="margin: 1rem 0;">4,800 tCO₂e</div>
+                    <div class="breakdown-list">
+                        <div class="breakdown-item"><div class="breakdown-label">Design Materials</div><div class="breakdown-value">3,100</div></div>
+                        <div class="breakdown-item"><div class="breakdown-label">IT Equipment</div><div class="breakdown-value">900</div></div>
+                        <div class="breakdown-item"><div class="breakdown-label">Food Services</div><div class="breakdown-value">800</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Forecast (AI) -->
+        <div id="forecast" class="tab-content">
+            <div class="roadmap-panel">
+                <h3 class="panel-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+                    Campus Consumption Forecast (90 Days)
+                </h3>
+                <p class="stat-subtitle">ML-driven prediction based on academic calendar & historical data.</p>
+                
+                <div style="margin-top: 2rem;">
+                    <div class="scope-header">
+                        <div class="scope-name">Energy Demand (kWh)</div>
+                        <div style="color: var(--zero-orange); font-size: 0.875rem;">Confidence: 94%</div>
+                    </div>
+                    <div class="chart-container" id="energyChart">
+                        <!-- Bars injected via JS -->
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 0.5rem; font-size: 0.75rem; color: var(--zero-gray-medium);">
+                        <span>Today</span>
+                        <span>+30 Days</span>
+                        <span>+60 Days</span>
+                        <span>+90 Days</span>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem;">
+                     <div class="scope-header">
+                        <div class="scope-name">Water Usage (m³)</div>
+                        <div style="color: var(--zero-navy); font-size: 0.875rem;">Confidence: 89%</div>
+                    </div>
+                    <div class="chart-container" id="waterChart" style="height: 150px; border-bottom: 1px solid #ddd;">
+                         <!-- Bars injected via JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Generator Mode -->
+        <div id="generator" class="tab-content">
+             <div class="roadmap-panel">
+                <h3 class="panel-title">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    Studio Brief Generator (Fine Arts)
+                </h3>
+                <p style="margin-bottom: 2rem; color: var(--zero-gray-dark);">Select a template to generate a data-driven design brief for students.</p>
+
+                <div class="brief-options">
+                    <div class="brief-option-card" onclick="selectBrief(1, this)">
+                        <h4>🏛 Adaptive Reuse</h4>
+                        <p style="font-size: 0.8rem; color: #666;">Heritage-friendly retrofit strategies for campus buildings.</p>
+                    </div>
+                    <div class="brief-option-card" onclick="selectBrief(2, this)">
+                        <h4>💡 Studio Optimization</h4>
+                        <p style="font-size: 0.8rem; color: #666;">Energy & lighting solutions for design workspaces.</p>
+                    </div>
+                    <div class="brief-option-card" onclick="selectBrief(3, this)">
+                        <h4>💧 Water & Behavior</h4>
+                        <p style="font-size: 0.8rem; color: #666;">Behavioral design interventions for water footprint.</p>
+                    </div>
+                </div>
+
+                <button class="action-btn" id="generateBtn" onclick="generateBrief()" style="width: 100%; margin-bottom: 2rem; display: none;">Generate Brief</button>
+
+                <div id="briefOutput" class="brief-output"></div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Roadmap -->
+        <div id="roadmap" class="tab-content">
+            <div class="roadmap-panel">
+                <h3 class="panel-title">Campus Net-Zero Roadmap</h3>
+                <div class="breakdown-list">
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">2025: Awareness & Data</div>
+                        <div class="breakdown-value" style="color: var(--zero-green);">✓ Completed</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">2028: Studio Retrofit</div>
+                        <div class="breakdown-value" style="color: var(--zero-orange);">In Progress</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">2030: Renewable Integration</div>
+                        <div class="breakdown-value">Planned</div>
+                    </div>
+                    <div class="breakdown-item">
+                        <div class="breakdown-label">2035: Net-Zero Campus</div>
+                        <div class="breakdown-value">Target</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Reporting -->
+        <div id="reporting" class="tab-content">
+            <div class="roadmap-panel">
+                <h3 class="panel-title">Institutional Output</h3>
+                <div class="scope-grid">
+                    <div class="scope-card">
+                        <div class="scope-name">CSRD</div>
+                        <p class="scope-description">Corporate Sustainability Reporting Directive</p>
+                        <button class="action-btn secondary" style="margin-top: 1rem; width: 100%;">Export XML</button>
+                    </div>
+                    <div class="scope-card">
+                        <div class="scope-name">GRI Standards</div>
+                        <p class="scope-description">Global Reporting Initiative</p>
+                        <button class="action-btn secondary" style="margin-top: 1rem; width: 100%;">Export PDF</button>
+                    </div>
+                    <div class="scope-card">
+                        <div class="scope-name">THE Impact</div>
+                        <p class="scope-description">Times Higher Education Ranking</p>
+                        <button class="action-btn secondary" style="margin-top: 1rem; width: 100%;">Prepare Submission</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="demoToast" class="demo-toast"></div>
+
+    <script>
+        // --- 1. SEED DATA & CONFIG ---
+        let selectedBriefId = 0;
+        
+        // ML Seed Data
+        const forecastData = Array.from({length: 30}, (_, i) => {
+            const date = new Date();
+            date.setDate(date.getDate() + i);
+            return {
+                day: i + 1,
+                energy: 400 + Math.random() * 100 + (i * 2), // Slight upward trend
+                water: 50 + Math.random() * 20,
+                isForecast: i > 10 // Last 20 days are forecast
+            };
+        });
+
+        // --- 2. CORE FUNCTIONS ---
+
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            // Find button that calls this function with this tabId
+            const btns = document.querySelectorAll('.tab-btn');
+            btns.forEach(btn => {
+                if(btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('active');
+                }
+            });
+
+            if (tabId === 'forecast') renderCharts();
+        }
+
+        // --- 3. CHARTS (Minimal CSS) ---
+        function renderCharts() {
+            const eContainer = document.getElementById('energyChart');
+            const wContainer = document.getElementById('waterChart');
+            
+            if (eContainer.innerHTML.trim() !== "") return; // Already rendered
+
+            // Energy Chart
+            eContainer.innerHTML = forecastData.map(d => {
+                const height = (d.energy / 600) * 100;
+                const color = d.isForecast ? 'var(--zero-orange)' : 'var(--zero-navy)';
+                const opacity = d.isForecast ? '0.6' : '1';
+                return `<div class="chart-bar" style="height: ${height}%; background: ${color}; opacity: ${opacity};" title="Day ${d.day}: ${Math.round(d.energy)} kWh"></div>`;
+            }).join('');
+
+            // Water Chart
+            wContainer.innerHTML = forecastData.map(d => {
+                const height = (d.water / 80) * 100;
+                return `<div class="chart-bar" style="height: ${height}%; background: var(--zero-navy);" title="Day ${d.day}: ${Math.round(d.water)} m3"></div>`;
+            }).join('');
+        }
+
+        // --- 4. GENERATOR MODE ---
+        function selectBrief(id, el) {
+            selectedBriefId = id;
+            document.querySelectorAll('.brief-option-card').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('generateBtn').style.display = 'block';
+            document.getElementById('briefOutput').classList.remove('visible');
+        }
+
+        function generateBrief() {
+            const output = document.getElementById('briefOutput');
+            const today = new Date().toLocaleDateString();
+            
+            let template = "";
+            
+            if (selectedBriefId === 1) {
+                template = `STUDIO BRIEF: ADAPTIVE REUSE & HERITAGE
+----------------------------------------
+DATE: ${today}
+TARGET: Block C (Historical Building)
+----------------------------------------
+
+PROBLEM:
+High thermal loss in heritage facade leads to 35% excess heating load.
+
+DATA SIGNALS:
+• Heating intensity: 180 kWh/m² (Campus avg: 120)
+• Peak loss times: 06:00 - 09:00 AM
+• Trend: +12% vs last year
+
+CONSTRAINTS:
+• Heritage Status: Grade II (No external modification)
+• Budget: Low (Student prototype scale)
+• UX: Must maintain natural light quality
+
+KPI TARGETS:
+• Heat Loss Reduction: 15%
+• ROI Potential: < 2 years
+• Carbon Impact: -2.5 tCO₂e/yr
+
+DELIVERABLES:
+1. Retrofit insulation prototype (material study)
+2. Thermal map visualization
+3. Dashboard snapshot of predicted savings
+
+TIMELINE: 3 Weeks`;
+            } else if (selectedBriefId === 2) {
+                template = `STUDIO BRIEF: LIGHTING OPTIMIZATION
+----------------------------------------
+DATE: ${today}
+TARGET: Design Studios 101-104
+----------------------------------------
+
+PROBLEM:
+Artificial lighting used 24/7 despite adequate daylighting potential.
+
+DATA SIGNALS:
+• Electricity baseload: Constant 45kW during daylight
+• Lux levels: Exceeding 500 lux in non-critical zones
+• Waste: ~30% energy wasted on empty zones
+
+CONSTRAINTS:
+• Visual Comfort: CRI > 90 required for art
+• Infrastructure: Existing wiring only
+• User Behavior: Students forget to switch off
+
+KPI TARGETS:
+• Energy Reduction: 25% (kWh/m²)
+• Cost Saving: ₺15,000/semester
+• CO₂e Avoided: 1.8 tons
+
+DELIVERABLES:
+1. Automated dimming strategy / sensor plan
+2. Reflector/Shelf physical prototype
+3. UX Guide for Studio Users
+
+TIMELINE: 2 Weeks`;
+            } else if (selectedBriefId === 3) {
+                template = `STUDIO BRIEF: WATER & BEHAVIOR
+----------------------------------------
+DATE: ${today}
+TARGET: Ceramic & Print Workshops
+----------------------------------------
+
+PROBLEM:
+Excessive water usage during brush/tool cleaning process.
+
+DATA SIGNALS:
+• Water spikes: End of classes (16:00 - 17:00)
+• Daily usage: 4.2 m³ (Target: 2.5 m³)
+• Leakage baseline: 0.2 m³/night
+
+CONSTRAINTS:
+• Hygiene standards must be met
+• Fast turnover between classes (15 min)
+• Space: Sink area only
+
+KPI TARGETS:
+• Water Consumption: -40% (m³/day)
+• Awareness: 100% student engagement
+• Payback: Immediate (low cost intervention)
+
+DELIVERABLES:
+1. Sink intervention design (flow restrictor/visual)
+2. Real-time feedback dashboard mock-up
+3. 1-Week Pilot Test Report
+
+TIMELINE: 4 Weeks`;
+            }
+
+            output.textContent = "GENERATING AI BRIEF...\n\n";
+            output.style.display = 'block';
+            
+            // Fake typing effect
+            let i = 0;
+            const type = setInterval(() => {
+                output.textContent = template.slice(0, i);
+                i++;
+                if (i > template.length) {
+                    clearInterval(type);
+                    output.classList.add('visible');
+                }
+            }, 5);
+        }
+
+        // --- 5. DEMO FLOW ---
+        const demoSteps = [
+            { 
+                tab: 'overview', 
+                text: "Campus is a city. We make it readable in one screen.",
+                target: "button[onclick*='overview']"
+            },
+            { 
+                tab: 'forecast', 
+                text: "Energy & Water forecast for next 30/90 days. ML-Ready demo seed.",
+                target: "button[onclick*='forecast']"
+            },
+            { 
+                tab: 'generator', 
+                text: "Turn data into a Studio Brief in 30 seconds.",
+                target: "button[onclick*='generator']"
+            },
+            { 
+                tab: 'reporting', 
+                text: "Board-ready outputs: KPI + ROI + CSRD-style summary.",
+                target: "button[onclick*='reporting']"
+            }
+        ];
+
+        let demoIndex = 0;
+        let demoTimer = null;
+
+        function startDemoMode() {
+            demoIndex = 0;
+            document.getElementById('demoOverlay').style.display = 'block';
+            runDemoStep();
+        }
+
+        function runDemoStep() {
+            if (demoIndex >= demoSteps.length) {
+                endDemo();
+                return;
+            }
+
+            const step = demoSteps[demoIndex];
+            showTab(step.tab);
+            
+            // Highlight Button
+            const targetBtn = document.querySelector(step.target);
+            
+            // Show Tooltip
+            const tooltip = document.getElementById('demoTooltip');
+            tooltip.innerHTML = `
+                <div>${step.text}</div>
+                <div class="demo-controls">
+                    <button class="demo-btn" onclick="endDemo()">End</button>
+                    ${demoIndex < demoSteps.length - 1 ? 
+                        `<button class="demo-btn primary" onclick="nextDemoStep()">Next</button>` : 
+                        `<button class="demo-btn primary" onclick="endDemo()">Finish</button>`}
+                </div>
+            `;
+            
+            // Positioning Logic
+            if(targetBtn) {
+                const rect = targetBtn.getBoundingClientRect();
+                tooltip.style.top = (rect.bottom + 15) + 'px';
+                tooltip.style.left = rect.left + 'px';
+                tooltip.style.display = 'block';
+            }
+            
+            // Auto-advance logic could go here if requested, 
+            // but user asked for "Next / Skip" controls primarily. 
+            // We'll keep it manual for better control during presentation unless ?demo=1 auto-plays.
+        }
+
+        function nextDemoStep() {
+            demoIndex++;
+            runDemoStep();
+        }
+
+        function endDemo() {
+            document.getElementById('demoOverlay').style.display = 'none';
+            document.getElementById('demoTooltip').style.display = 'none';
+            // Return to Overview
+            showTab('overview');
+        }
+
+        // Check URL param for auto-start
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('demo') === '1') {
+            // Slight delay to ensure DOM is ready
+            setTimeout(startDemoMode, 1000);
+        }
+
+    </script>
+</body>
+</html>
