@@ -1,0 +1,14 @@
+[Unit]
+Description=Zero@Campus Backend API
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/var/www/zeroatcampus
+Environment="PATH=/var/www/zeroatcampus/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/var/www/zeroatcampus/venv/bin/uvicorn backend.main:app --host 127.0.0.1 --port 8095
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
