@@ -547,6 +547,8 @@ def export_gri_pdf(scope: str = "campus", id: Optional[str] = None):
     from reportlab.pdfgen import canvas
     from reportlab.lib.pagesizes import A4
     from reportlab.lib import colors
+    from pathlib import Path
+    import time
     
     # Resolve Scope Name for Header
     scope_subtitle = "Campus Overview"
@@ -566,44 +568,86 @@ def export_gri_pdf(scope: str = "campus", id: Optional[str] = None):
     filename = f"Zero_Campus_GRI_{scope}_{id if id else 'all'}.pdf"
     filepath = os.path.join(EVIDENCE_DIR, filename)
     
+    # Enterprise Header Setup
+    BASE_DIR = Path(__file__).resolve().parents[1]
+    # We will use text for Zero logo if image missing, but try to use what we have
+    # Since we don't have a dedicated zero.logo.png yet, we'll create a placeholder or just use text.
+    # But user asked to use assets/img/ieu-logo.png for IEU.
+    LOGO_IEU = BASE_DIR / "assets/img/ieu-logo.png" 
+    
+    # Generate Evidence ID
+    evid = f"EVID-{datetime.datetime.utcnow().strftime('%Y%m%d-%H%M')}-{scope}-{(id or 'campus')}"
+    
     c = canvas.Canvas(filepath, pagesize=A4)
     width, height = A4
     
-    # 1. Enterprise Header (Navy + Orange Strip)
-    c.setFillColor(colors.HexColor("#0a192f")) # Zero Navy
-    c.rect(0, height - 100, width, 100, fill=1, stroke=0)
+    # 1. Enterprise Header (Clean White + Logos)
+    # Top bar logic: Zero Logo (Left) | IEU Logo (Right) | Title (Center/Left)
     
-    c.setFillColor(colors.HexColor("#FF6B00")) # Zero Orange
-    c.rect(0, height - 105, width, 5, fill=1, stroke=0)
+    y = height - 60
     
-    # Partner Logo (IEU)
-    PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    LOGO_PATH = os.path.join(PROJECT_ROOT, "assets", "img", "ieu-logo.jpg")
+    # Draw Zero@Campus Text Logo (Left)
+    c.setFont("Helvetica-Bold", 20)
+    c.setFillColor(colors.HexColor("#0a192f"))
+    c.drawString(40, y, "Zero@Ecosystem")
     
-    if os.path.exists(LOGO_PATH):
+    # Draw IEU Logo (Right)
+    if LOGO_IEU.exists():
         try:
-            # Draw logo at top right
-            # x, y, width, height. y is from bottom-left
-            # Header is at height-100 to height.
-            logo_size = 60
-            c.drawImage(LOGO_PATH, width - 100, height - 80, width=logo_size, height=logo_size, mask='auto')
-        except Exception as e:
-            print(f"Error drawing logo: {e}")
+            # maintain aspect ratio approx
+            c.drawImage(str(LOGO_IEU), width - 100, y - 10, width=60, height=60, mask='auto', preserveAspectRatio=True)
+        except Exception:
+            pass
 
-    c.setFillColor(colors.white)
-    c.setFont("Helvetica-Bold", 24)
-    c.drawString(40, height - 50, "Zero@Campus")
-    c.setFont("Helvetica", 14)
-    c.drawString(40, height - 75, f"Sustainability Performance Report (GRI) • {scope_subtitle}")
+    # Title & Metadata
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(40, y - 30, "Zero@Campus — THE Impact Submission Checklist")
     
     c.setFont("Helvetica", 10)
-    # Adjusted x positions to avoid logo overlap if needed, but width-200 is safe
-    c.drawString(width - 200, height - 50, f"Generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    c.drawString(width - 200, height - 65, f"System Version: {state.get('backend_version', 'v1.0')}")
-    c.drawString(width - 200, height - 80, f"Ref: {state.get('last_backup', {}).get('file', 'N/A')}")
+    c.setFillColor(colors.HexColor("#555555"))
+    c.drawString(40, y - 46, f"Scope: {scope_subtitle}   •   Generated: {datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}   •   {evid}")
+    
+    # Separator Line
+    c.setStrokeColor(colors.HexColor("#FF6B00")) # Zero Orange
+    c.setLineWidth(2)
+    c.line(40, y - 55, width - 40, y - 55)
+    
+    # Reset Color
+    c.setFillColor(colors.black)
+    
+    y = height - 140
+    
+    # A) What this means
+    c.setFont("Helvetica", 10)
+    text_lines = [
+        "This checklist summarizes readiness for THE Impact submission.",
+        "Statuses reflect data completeness and evidence availability for the selected scope.",
+        "Use 'Pending Review' items to drive immediate data actions and assign owners."
+    ]
+    for line in text_lines:
+        c.drawString(40, y, line)
+        y -= 14
+        
+    y -= 10
+    
+    # B) Next Actions (Pilot)
+    c.setFont("Helvetica-Bold", 11)
+    c.drawString(40, y, "Next Actions (Pilot)")
+    y -= 16
+    
+    c.setFont("Helvetica", 10)
+    actions = [
+        "• SDG12: Complete procurement & waste data (Owner: Purchasing, Due: 7 days)",
+        "• Validate energy/water meters & invoices (Owner: Facilities, Due: 48h)",
+        "• Generate Evidence Pack ZIP and archive with ID (Owner: Sustainability, Due: 24h)"
+    ]
+    for act in actions:
+        c.drawString(40, y, act)
+        y -= 14
+        
+    y -= 30
     
     # 2. Executive Summary (System Health)
-    y = height - 160
     c.setFillColor(colors.black)
     c.setFont("Helvetica-Bold", 16)
     c.drawString(40, y, "1. System & Operational Status")
@@ -624,6 +668,7 @@ def export_gri_pdf(scope: str = "campus", id: Optional[str] = None):
     
     # Draw KPI Box
     c.setStrokeColor(colors.HexColor("#eee"))
+    c.setLineWidth(1)
     c.rect(40, y - 80, width - 80, 90, fill=0)
     
     c.setFont("Helvetica-Bold", 12)
@@ -664,12 +709,17 @@ def export_gri_pdf(scope: str = "campus", id: Optional[str] = None):
     # Footer
     c.setFont("Helvetica-Oblique", 9)
     c.setFillColor(colors.gray)
-    c.drawString(40, 40, "Prepared for İzmir Ekonomi Üniversitesi • Zero@Campus Pilot Program")
+    c.drawString(40, 40, f"Generated by Zero@Ecosystem • Zero@Campus • {evid} • For pilot use — not an official disclosure.")
     c.drawCentredString(width/2, 40, "Page 1 of 1")
     
     c.save()
     
-    return FileResponse(filepath, media_type='application/pdf', filename=filename)
+    return FileResponse(
+        filepath, 
+        media_type='application/pdf', 
+        filename=filename,
+        headers={"Content-Disposition": f'attachment; filename="{evid}.pdf"'}
+    )
 
 @app.get("/api/export/csrd.xml")
 def export_csrd_xml():

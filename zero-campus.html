@@ -720,7 +720,7 @@
         }
         
         .partner-badge img {
-            height: 36px;
+            height: 72px;
             width: auto;
             border-radius: 50%;
             border: 1px solid #eee;
@@ -787,7 +787,7 @@
         @media (max-width: 900px) {
             .partner-badge div { display: none; }
             .partner-badge { padding: 0; background: transparent; border: none; box-shadow: none; }
-            .partner-badge img { height: 32px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+            .partner-badge img { height: 64px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
         }
     </style>
 <script>
@@ -826,7 +826,7 @@ window.__ZERO_API_BASE = (location.protocol + "//" + location.hostname + ":8095"
 
             <!-- Partner Badge -->
             <div class="partner-badge" aria-label="Pilot Partner: İzmir Ekonomi Üniversitesi">
-               <img src="campus.logo.svg" alt="İzmir Ekonomi Üniversitesi" />
+               <img src="assets/img/ieu-logo.png" alt="İzmir Ekonomi Üniversitesi" />
                <div style="display: flex; flex-direction: column;">
                    <span class="badge-title">Pilot Partner</span>
                    <span class="badge-subtitle">İzmir Ekonomi Üniversitesi</span>
@@ -977,7 +977,7 @@ window.__ZERO_API_BASE = (location.protocol + "//" + location.hostname + ":8095"
                             <option value="Facility">Facility Manager</option>
                             <option value="Sustainability">Sustainability Office</option>
                         </select>
-                        <button class="action-btn" onclick="askBrain()">Ask Brain</button>
+                        <button type="button" class="action-btn" onclick="askBrain(event)">Ask Brain</button>
                     </div>
                     <div id="brain-response" style="margin-top: 1rem; font-size: 0.85rem; color: var(--zero-navy); display: none;"></div>
                 </div>
@@ -1001,7 +1001,7 @@ window.__ZERO_API_BASE = (location.protocol + "//" + location.hostname + ":8095"
                                 <div class="breakdown-value">88%</div>
                             </div>
                         </div>
-                        <button class="action-btn" style="width: 100%; margin-top: 1rem;" onclick="alert('Generating Rectorate Brief...')">Generate Strategic View</button>
+                        <button class="action-btn" style="width: 100%; margin-top: 1rem;" onclick="generateView('rector')">Generate Strategic View</button>
                     </div>
 
                     <!-- Dean -->
@@ -1045,6 +1045,17 @@ window.__ZERO_API_BASE = (location.protocol + "//" + location.hostname + ":8095"
                         </div>
                         <button class="action-btn" style="width: 100%; margin-top: 1rem;" onclick="generateView('ops')">Generate Ops View</button>
                     </div>
+                </div>
+
+                <!-- Generated Output (Executive) -->
+                <div id="generatedOutputWrap" style="display:none; margin-top:14px;">
+                  <div class="panel" style="border:1px solid rgba(0,0,0,.08); border-radius:12px; padding:14px; background: #fdfdfd;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+                      <div style="font-weight:700; color: var(--zero-navy);">Generated Output</div>
+                      <button type="button" class="btn" style="font-size: 0.8rem; padding: 4px 10px;" onclick="document.getElementById('generatedOutputWrap').style.display='none'">Close</button>
+                    </div>
+                    <pre id="generatedOutputText" style="white-space:pre-wrap; margin:10px 0 0; font-size:12.5px; line-height:1.4; color: #333; font-family: monospace; border-top: 1px solid #eee; padding-top: 10px;"></pre>
+                  </div>
                 </div>
             </div>
         </div>
@@ -2067,7 +2078,11 @@ window.__ZERO_API_BASE = (location.protocol + "//" + location.hostname + ":8095"
         // --- 8. BRAIN INTENT & NAVIGATION ---
         let navigationTimer = null;
         
-        async function askBrain() {
+        async function askBrain(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
             const role = document.getElementById('roleSelector').value;
             const output = document.getElementById('brain-response');
             
@@ -2330,17 +2345,77 @@ TIMELINE: 4 Weeks`;
             // We'll keep it manual for better control during presentation unless ?demo=1 auto-plays.
         }
 
+        // --- 11. GENERATED OUTPUT HELPER (Final Fix) ---
+        function openGeneratedOutput(targetTab) {
+            try {
+                if (targetTab) showTab(targetTab);
+                const wrap = document.getElementById('generatedOutputWrap');
+                if (wrap) {
+                    wrap.style.display = 'block';
+                    // Ensure it's in the current tab
+                    if (targetTab === 'executive') {
+                        // Move wrap if needed or assume it's already there
+                        // For this fix, we injected it into 'executive' tab explicitly
+                    }
+                }
+                const el = document.getElementById('generatedOutputText') || wrap;
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } catch (e) {
+                console.error("Output scroll failed", e);
+            }
+        }
+
         function generateView(type) {
-            const title = type === 'dean' ? "Generating Dean's Brief" : "Generating Ops View";
-            const steps = ["Querying Database", "Applying Filters", "Rendering View"];
+            const title = type === 'rector' ? "Generating Strategic View" : (type === 'dean' ? "Generating Dean's Brief" : "Generating Ops View");
             
-            showModal(title, steps);
+            // Show modal first
+            const timer = showModal(title, ["Fetching Data", "Analyzing KPIs", "Formatting Output"]);
             
             setTimeout(() => {
-                showToast("View Generated", "Dashboard updated for selected role.", "success");
-                // Here we would filter the view, but for demo just clear modal
-            }, 2500);
+                let output = "";
+                let targetTab = "executive"; // default
+
+                if (type === 'rector') {
+                    output = `STRATEGIC CAMPUS OVERVIEW (RECTORATE)\n----------------------------------------\nDATE: ${new Date().toLocaleDateString()}\nSCOPE: Whole Campus\n----------------------------------------\n\nEXECUTIVE SUMMARY:\n• Overall Net-Zero Progress: 42% (On Track)\n• Critical Alert: Energy intensity in Block C (+15% YoY)\n• Opportunity: Solar capacity expansion approved\n\nKEY METRICS:\n• Carbon Footprint: 18,450 tCO2e\n• Student Satisfaction: 88%\n• Research Impact: High (12 Active Projects)\n\nRECOMMENDATIONS:\n1. Approve Phase 2 Solar Investment\n2. Review Block C Retrofit Proposal\n3. Launch "Green Campus" PR Campaign`;
+                } else if (type === 'dean') {
+                    output = `FACULTY BRIEF: FINE ARTS & DESIGN\n----------------------------------------\nDATE: ${new Date().toLocaleDateString()}\nSCOPE: Faculty\n----------------------------------------\n\nPERFORMANCE:\n• Sustainable Courses: 12 / 40 (Target: 20)\n• Studio Material Waste: -10% vs last semester\n\nCURRICULUM ACTIONS:\n• Integrate "Circular Design" module into Year 2\n• Launch "Waste-to-Art" exhibition\n\nSTUDENT FEEDBACK:\n"More recycling bins needed in studios."`;
+                } else if (type === 'ops') {
+                    targetTab = "executive"; // We put the output box in executive, so keep it there or move it?
+                    // Actually Ops View usually goes to Operations tab, but our output box is in Executive.
+                    // Let's force it to Executive for now to ensure visibility, or clone the box.
+                    // User requirement: "View Output" -> openGeneratedOutput('executive') is safest.
+                    output = `OPERATIONAL REPORT: FACILITY MANAGEMENT\n----------------------------------------\nDATE: ${new Date().toLocaleDateString()}\nSCOPE: Campus Operations\n----------------------------------------\n\nENERGY:\n• Electricity: 5,200 MWh (Peak: 14:00)\n• Gas: 3,250 MWh (Heating season)\n\nMAINTENANCE:\n• HVAC Unit 4 (Library): Requires Service\n• Water Leak (Dorm B): Resolved\n\nNEXT 24H:\n• Schedule filter replacement for Main Hall\n• Verify night-time shutdown protocols`;
+                }
+
+                // Set text
+                const outEl = document.getElementById('generatedOutputText');
+                if(outEl) outEl.textContent = output;
+
+                // Update Modal Action Button to open this
+                const actionBtn = document.getElementById('modalActionBtn');
+                if(actionBtn) {
+                    actionBtn.onclick = () => {
+                        closeModal();
+                        openGeneratedOutput(targetTab);
+                    };
+                    // We don't show it here, modal logic handles display. 
+                    // Wait, showModal doesn't show action button by default.
+                    // We need to enable it in showModal or handle it here.
+                    // Let's update showModal logic slightly to allow custom action or just handle closing.
+                    
+                    // Actually, let's just auto-close and show output after delay? 
+                    // No, "View Output" button is better.
+                    // Let's hack the modal footer to show "View Output"
+                    actionBtn.style.display = 'inline-block';
+                    actionBtn.innerText = "View Output";
+                }
+                
+                // Show toast
+                // showToast("Generated", "Report ready to view.", "success");
+                
+            }, 2000);
         }
+
 
         function nextDemoStep() {
             demoIndex++;
